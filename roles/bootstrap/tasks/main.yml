@@ -2,14 +2,14 @@
 - name: update and upgrade apt packages
   ansible.builtin.apt:
     upgrade: yes
-    update_cache: yes
+    update_cache: true
 
 - name: create non root user
   ansible.builtin.user:
     name: "{{deploy_user}}"
     create_home: true
     shell: /bin/bash
-    group: sudo
+    groups: sudo
     append: true
 
 - name: add non root user public ssh key

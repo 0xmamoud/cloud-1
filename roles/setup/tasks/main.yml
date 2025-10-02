@@ -1,0 +1,51 @@
+---
+- name: update cache
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: install base packages (curl and docker dependencies )
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+      - python3-pip
+      - virtualenv
+      - python3-setuptools
+    state: latest
+    update_cache: true
+
+- name: add docker gpg apt key
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker Repository
+  ansible.builtin.apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu focal stable
+    state: present
+
+- name: Update apt and install docker-ce
+  ansible.builtin.apt:
+    name: docker-ce
+    state: latest
+    update_cache: true
+
+- name: install docker module for python
+  ansible.builtin.pip:
+    name:
+      - docker
+
+- name: ensure docker running permanently
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: add {{ deploy_user }} to docker group
+  ansible.builtin.user:
+    name: "{{ deploy_user }}"
+    groups:
+      - docker
+    append: true
