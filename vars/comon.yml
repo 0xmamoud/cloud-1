@@ -1,0 +1,2 @@
+deploy_user: mkane
+pubkey_path: "~/.ssh/id_rsa.pub"

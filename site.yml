@@ -1,0 +1,27 @@
+---
+- name: bootstrap server
+  hosts: hosts
+  become: true
+  remote_user: root
+  vars_files:
+    - vars/common.yml
+  roles:
+    - bootstrap
+
+- name: install dependencies
+  hosts: hosts
+  become: true
+  remote_user: "{{ deploy_user }}"
+  vars_files:
+    - vars/common.yml
+  roles:
+    - setup
+
+- name: deploy inception project
+  hosts: hosts
+  become: true
+  remote_user: "{{ deploy_user }}"
+  vars_files:
+    - vars/common.yml
+  roles:
+    - inception
