@@ -1,0 +1,26 @@
+---
+- name: update and upgrade apt packages
+  ansible.builtin.apt:
+    upgrade: yes
+    update_cache: yes
+
+- name: create non root user
+  ansible.builtin.user:
+    name: "{{deploy_user}}"
+    create_home: true
+    shell: /bin/bash
+    group: sudo
+    append: true
+
+- name: add non root user public ssh key
+  ansible.builtin.authorized_key:
+    user: "{{ deploy_user }}"
+    key: "{{ lookup('file', pubkey_path) }}"
+
+- name: give sudo without password
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/{{ deploy_user }}"
+    content: "{{ deploy_user }} ALL=(ALL) NOPASSWD:ALL\n"
+    owner: root
+    group: root
+    mode: "0440"
