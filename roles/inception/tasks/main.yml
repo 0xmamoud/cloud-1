@@ -22,7 +22,7 @@
 
 - name: build and run containers with docker compose
   community.docker.docker_compose_v2:
-    project_src: "/home/{{ deploy_user }}/inception"
+    project_src: "/home/{{ deploy_user }}/inception/srcs"
     build: always
     state: present
     remove_orphans: true
