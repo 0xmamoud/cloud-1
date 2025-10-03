@@ -1,0 +1,28 @@
+---
+- name: create inception project directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0755"
+  loop:
+    - "/home/{{ deploy_user }}/inception"
+    - "/home/{{ deploy_user }}/data/mariadb"
+    - "/home/{{ deploy_user }}/data/wordpress"
+
+- name: copy inception code to server
+  ansible.builtin.copy:
+    src: "roles/inception/files/"
+    dest: "/home/{{ deploy_user }}/inception"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0644"
+    directory_mode: "0755"
+
+- name: build and run containers with docker compose
+  community.docker.docker_compose_v2:
+    project_src: "/home/{{ deploy_user }}/inception"
+    build: always
+    state: present
+    remove_orphans: true
