@@ -4,6 +4,11 @@
     upgrade: yes
     update_cache: true
 
+- name: create group for non root user
+  ansible.builtin.group:
+    name: "{{ deploy_user }}"
+    state: present
+
 - name: create non root user
   ansible.builtin.user:
     name: "{{deploy_user}}"
