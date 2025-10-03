@@ -1,0 +1,58 @@
+---
+- name: cleanup inception deployment
+  hosts: hosts
+  become: true
+  remote_user: "{{ deploy_user }}"
+  vars_files:
+    - vars/common.yml
+  tasks:
+    - name: stop and remove all docker compose services
+      community.docker.docker_compose_v2:
+        project_src: "/home/{{ deploy_user }}/inception/srcs"
+        state: absent
+        remove_orphans: true
+      become_user: "{{ deploy_user }}"
+      ignore_errors: true
+
+    - name: remove all docker containers
+      ansible.builtin.shell: docker rm -f $(docker ps -aq)
+      become_user: "{{ deploy_user }}"
+      ignore_errors: true
+
+    - name: remove all docker images
+      ansible.builtin.shell: docker rmi -f $(docker images -q)
+      become_user: "{{ deploy_user }}"
+      ignore_errors: true
+
+    - name: remove all docker volumes
+      ansible.builtin.shell: docker volume rm $(docker volume ls -q)
+      become_user: "{{ deploy_user }}"
+      ignore_errors: true
+
+    - name: remove all docker networks (except defaults)
+      ansible.builtin.shell: docker network rm $(docker network ls -q --filter type=custom)
+      become_user: "{{ deploy_user }}"
+      ignore_errors: true
+
+    - name: prune docker system
+      ansible.builtin.shell: docker system prune -af --volumes
+      become_user: "{{ deploy_user }}"
+      ignore_errors: true
+
+    - name: remove inception project directory
+      ansible.builtin.file:
+        path: "/home/{{ deploy_user }}/inception"
+        state: absent
+
+    - name: remove data directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "/home/{{ deploy_user }}/data/mariadb"
+        - "/home/{{ deploy_user }}/data/wordpress"
+        - "/home/{{ deploy_user }}/data"
+
+    - name: display cleanup completion message
+      ansible.builtin.debug:
+        msg: "Cleanup complete! You can now run 'ansible-playbook -i inventory.ini site.yml' to redeploy."
